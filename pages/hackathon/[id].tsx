@@ -3,7 +3,17 @@ import { observer } from 'mobx-react';
 import Link from 'next/link';
 import { cache, compose, errorLogger } from 'next-ssr-middleware';
 import { FC, useContext } from 'react';
-import { Badge, Card, Col, Container, Row } from 'react-bootstrap';
+import {
+  Badge,
+  Button,
+  ButtonGroup,
+  Card,
+  Col,
+  Container,
+  Dropdown,
+  DropdownButton,
+  Row,
+} from 'react-bootstrap';
 import { text2color, UserRankView } from 'idea-react';
 import { formatDate } from 'web-utility';
 
@@ -67,21 +77,14 @@ interface HackathonDetailProps {
   };
 }
 
-const formatDateTime = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleString('zh-CN', {
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-};
+const FormButtonBar = ['Person', 'Project', 'Product', 'Evaluation'];
 
 const HackathonDetail: FC<HackathonDetailProps> = observer(({ activity, hackathon }) => {
   const { t } = useContext(I18nContext);
 
-  const { name, summary, location, startTime, endTime } = activity,
+  const { name, summary, location, startTime, endTime, databaseSchema } = activity,
     { people, organizations, agenda, prizes, templates, projects } = hackathon;
+  const { forms } = databaseSchema as BiTableSchema;
 
   return (
     <>
@@ -99,7 +102,7 @@ const HackathonDetail: FC<HackathonDetailProps> = observer(({ activity, hackatho
                 <Card.Body>
                   <h5 className="text-white mb-2">📍 {t('event_location')}</h5>
                   <p className="text-white-50 mb-0">
-                    {(location as TableCellLocation).full_address}
+                    {(location as TableCellLocation)?.full_address}
                   </p>
                 </Card.Body>
               </Card>
@@ -115,6 +118,33 @@ const HackathonDetail: FC<HackathonDetailProps> = observer(({ activity, hackatho
               </Card>
             </Col>
           </Row>
+
+          <ButtonGroup className="d-flex mt-3">
+            {FormButtonBar.map((key, index) => {
+              const list = forms[key]?.filter(
+                // @ts-expect-error Upstream types bug
+                ({ shared_limit }) => shared_limit === 'anyone_editable',
+              );
+
+              return !list?.[0] ? null : list.length < 2 ? (
+                <Button href={list[0].shared_url} target="_blank" rel="noreferrer">
+                  {index + 1}. {list[0].name}
+                </Button>
+              ) : (
+                <DropdownButton
+                  as={ButtonGroup}
+                  title={`${index + 1}. ${t('product_submission')}`}
+                  id={`dropdown-${key}`}
+                >
+                  {list.map(({ name, shared_url }) => (
+                    <Dropdown.Item key={name} href={shared_url} target="_blank" rel="noreferrer">
+                      {name}
+                    </Dropdown.Item>
+                  ))}
+                </DropdownButton>
+              );
+            })}
+          </ButtonGroup>
         </Container>
       </section>
 

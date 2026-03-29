@@ -215,6 +215,7 @@ export default {
   event_description: 'Event Description',
   event_location: 'Location',
   event_duration: 'Duration',
+  product_submission: 'Product Submission Form',
   agenda: 'Agenda',
   participants: 'Participants',
   organizations: 'Organizations',

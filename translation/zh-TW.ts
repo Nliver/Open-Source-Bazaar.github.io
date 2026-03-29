@@ -211,6 +211,7 @@ export default {
   event_description: '活動描述',
   event_location: '活動地點',
   event_duration: '活動時間',
+  product_submission: '產品提交',
   agenda: '日程安排',
   participants: '參與者',
   organizations: '組織方',
